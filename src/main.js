@@ -58,12 +58,10 @@ const store = createStore({
       commit('setPartners', data);
     },
     async blockPartner ({ commit }, id) {
-      const partners = await axios.get(`partner/${id}/block`, axiosOptions);
-      commit('setPartners', partners);
+      await axios.get(`partner/${id}/block`, axiosOptions);
     },
     async unblockPartner ({ commit }, id) {
-      const partners = await axios.get(`partner/${id}/unblock`, axiosOptions);
-      commit('setPartners', partners);
+      await axios.get(`partner/${id}/unblock`, axiosOptions);
     },
     changeSort ({ commit }) {
       commit('changeSort');
