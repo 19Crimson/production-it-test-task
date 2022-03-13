@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: BOM API
+  version: 1.1.1
+  description: Documentation API for Bill of Materials
+servers:
+  - url: https://tco-dev.evrazsteelbuilding.ru/api/
+    description: Developer server
+tags:
+  - name: Model
+  - name: Calculation
+  - name: Calculations
+  - name: Repository
+  - name: Partners
+  - name: Privilege
+  - name: Customers
+paths:
+  /partners/:
+    get:
+      tags:
+        - Partners
+      description: список партнеров
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/Partners'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /partner/{externalId}/registration:
+    post:
+      tags:
+        - Partners
+      description: регистрация партнера
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/externalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerRegistration'
+      responses:
+        '200':
+          $ref: '#/components/responses/PartnerRegistration'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /partner/{externalId}/block:
+    get:
+      tags:
+        - Partners
+      description: блокировка партнера
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/PartnerBlock'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/PartnerNotFound'
+  /partner/{externalId}/unblock:
+    get:
+      tags:
+        - Partners
+      description: разблокировка партнера
+      security:
+        - ApiKeyAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/PartnerBlock'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/PartnerNotFound'
+
+components:
+  parameters:
+    externalId:
+      in: path
+      name: externalId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: внешний идентификатор
+    registrationExternalId:
+      in: path
+      name: registrationExternalId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: внешний идентификатор регистрации расчета
+    fileType:
+      in: path
+      name: fileType
+      schema:
+        type: string
+        enum:
+          - tco
+          - specification
+      required: true
+      description: внешний идентификатор регистрации расчета
+  responses:
+    CalculationRegisterResult:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CalculationRegisterResult'
+
+    PartnerNotFound:
+      description: расчет не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnauthorizedError:
+      description: Неверный токен доступа
+    Error:
+      description: Произошла ошибка
+    Forbidden:
+      description: доступ запрещен
+    Partners:
+      description: список партнеров
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Partners'
+    PartnerRegistration:
+      description: регистрация партнера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PartnerRegistrationResponse'
+    PartnerBlock:
+      description: блокировка партнера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PartnerBlock'
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+    Partners:
+      type: array
+      items:
+        type: object
+        properties:
+          external_id:
+            type: string
+            format: uuid
+            description: внешний идентификатор партнера
+          name:
+            type: string
+            description: ФИО партнера
+          phone:
+            type: string
+            description: номер телефона партнера
+          email:
+            type: string
+            description: email партнера
+          created:
+            type: string
+            format: date-time
+          status:
+            type: string
+            enum:
+              - active
+              - blocked
+          company:
+            type: object
+            properties:
+              external_id:
+                type: string
+                format: uuid
+                description: внешний идентификатор компании
+              name:
+                type: string
+                description: наименование компании
+    PartnerRegistrationResponse:
+      type: object
+      properties:
+        external_id:
+          type: string
+          format: uuid
+    Conflict:
+      type: object
+      properties:
+        code:
+          type: string
+          description: код ошибки
+        message:
+          type: string
+          description: описание ошибки
+    PartnerRegistration:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: имя партнера
+        second_name:
+          type: string
+          description: отчество партнера
+        last_name:
+          type: string
+          description: фамилия партнера
+        phone:
+          type: string
+          description: номер телефона партнера
+        email:
+          type: string
+          description: E-mail партнера
+        company_name:
+          type: string
+          description: наименование компании
+    PartnerBlock:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - active
+            - blocked
